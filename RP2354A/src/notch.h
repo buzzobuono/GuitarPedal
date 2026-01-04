@@ -7,5 +7,5 @@ void notch_init(float pot1, float pot2, float pot3, float pot4)
 
 float notch_step(float in)
 {
-	return biquad_step(&notch_bq, in);
+	return biquad_step(&notch_bq.coeff, &notch_bq.state, in);
 }
