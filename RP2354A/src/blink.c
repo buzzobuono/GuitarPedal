@@ -20,7 +20,7 @@
 #include "flanger.h"
 #include "echo.h"
 #include "fm.h"
-#include "notch.h"
+#include "phaser.h"
 
 volatile int enabled = 1;
 
@@ -81,7 +81,7 @@ struct effect {
 	void (*init)(float, float, float, float);
 	float (*step)(float);
 } effects[] = {
-	{ notch_init, notch_step },
+	{ phaser_init, phaser_step },
 	{ flanger_init, flanger_step },
 	{ echo_init, echo_step },
 	{ fm_init, fm_step },
