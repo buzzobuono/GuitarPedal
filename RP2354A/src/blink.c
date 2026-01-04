@@ -21,6 +21,7 @@
 #include "echo.h"
 #include "fm.h"
 #include "phaser.h"
+#include "discont.h"
 
 volatile int enabled = 1;
 
@@ -41,7 +42,7 @@ static int64_t alarm_callback(alarm_id_t id, void *user_data)
 // Shorter presses change the state.
 // 1s+ press for effect switch
 // 5s press for reboot.
-#define WATCHDOG_TIMEOUT 5000
+#define WATCHDOG_TIMEOUT 2000
 static void stomp_irq(uint gpio, uint32_t event_mask)
 {
 	static absolute_time_t last_time;
@@ -81,6 +82,7 @@ struct effect {
 	void (*init)(float, float, float, float);
 	float (*step)(float);
 } effects[] = {
+	{ discont_init, discont_step },
 	{ phaser_init, phaser_step },
 	{ flanger_init, flanger_step },
 	{ echo_init, echo_step },
