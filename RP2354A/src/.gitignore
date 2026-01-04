@@ -2,3 +2,4 @@ build/
 gensin
 gensin.h
 test_sincos
+test_pow2

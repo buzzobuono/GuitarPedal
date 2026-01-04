@@ -9,7 +9,7 @@
 struct {
 	unsigned int i;
 	float diff;
-	float d1, d2;
+	float delay;
 } disco;
 
 #define DISCONT_STEPS 4096
@@ -22,14 +22,11 @@ void discont_init(float pot1, float pot2, float pot3, float pot4)
 	// Walking backwards lowers the pitch
 	// Walking forwards raises the pitch
 	// Staying at the same delay keeps the pitch the same
-	disco.diff = fastpow2_m1(semitone);
+	disco.diff = fastpow2(semitone) - 1;
 	if (disco.diff <= 0)
-		disco.d1 = 0;
+		disco.delay = 0;
 	else
-		disco.d1 = disco.diff * DISCONT_STEPS;
-
-	disco.d1 = disco.d1 + pot3*SAMPLES_PER_SEC*0.020;
-	disco.d2 = disco.d1 + disco.diff * DISCONT_STEPS * 0.3;
+		disco.delay = disco.diff * DISCONT_STEPS;
 }
 
 // sin_i is discontinuous when sin is 0
@@ -45,8 +42,8 @@ float discont_step(float in)
 	sincos.cos = sincos.cos * sincos.cos;
 
 	sample_array_write(in);
-	float d1 = sample_array_read(disco.d1 - i*disco.diff) * sincos.sin;
-	float d2 = sample_array_read(disco.d2 - cos_i*disco.diff) * sincos.cos;
+	float d1 = sample_array_read(disco.delay - i*disco.diff) * sincos.sin;
+	float d2 = sample_array_read(disco.delay - cos_i*disco.diff) * sincos.cos;
 
 	return d1+d2;
 }

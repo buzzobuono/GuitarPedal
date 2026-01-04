@@ -13,10 +13,26 @@ static inline float fastpow2_m1(float x)
 {
 	const float c1 = LN2,
 		    c2 = LN2*LN2/2,
-		    c3 = LN2*LN2*LN2/6;
+		    c3 = LN2*LN2*LN2/6,
+		    c4 = LN2*LN2*LN2/24;
 	float x2 = x*x;
 	float x3 = x2*x;
-	return c1*x + c2*x2 + c3*x3;
+	return c1*x + c2*x2 + c3*x3 + c4*x2*x2;
+}
+
+static inline float fastpow2(float x)
+{
+	int i = floor(x); x -= i;
+	x = fastpow2_m1(x) + 1.0;
+	while (i > 0) {
+		x*=2;
+		i--;
+	}
+	while (i < 0) {
+		x/=2;
+		i++;
+	}
+	return x;
 }
 
 static inline float fastpow(float a, float b)
