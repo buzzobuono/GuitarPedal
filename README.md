@@ -1,5 +1,108 @@
 ## Random guitar pedal board design
 
+### This project is archived
+
+I got about as far as I was interested to get in this form.
+
+The analog pedals were never very interesting from a sound perspective,
+but they were great for learnign the basics.  That last boost pedal (not
+in a 1590LB form factor, despite the pathname) with a long-tailed pair
+and a few current sources, was really about as far as I was interested
+in the analog side.
+
+Along the way, I learnt about transistors (BJTs, MOSFETs and JFETs),
+about diode mixers, Gilbert cells etc.  None of the pedals made pleasing
+sounds, and I still think analog pedals are pointless, but as a learning
+exercise they were great.
+
+The digital pedal then took me longer to get around to because there
+were so many choices and the initial step was bigger - but I was never
+interested in just connecting together other peoples boards.
+
+Admittedly that's the sane thing to do: get a Raspberry PI, get any of a
+number of audio hats for it, and go wild.
+
+But once I got past the starting line on the digital board, I have to
+say that I really enjoyed it more than I thought I would.
+
+## The good:
+
+### RP2354A
+
+The RP2354A was a delight to play with the PIO engine and just generally
+having a nice SDK and a good documented minimal board design.
+Programming it over USB was easy, and while I had a TagConnect setup for
+the "in case I need it" SWD debug option, it was never necessary.  I'd
+probably keep it for any future board, but it's a "probably".
+
+The minimal board example was good, and the docs are good.  All in all,
+a very good experience.  The fact that the board worked on the first
+try, and I never had any real issues despite me not being a hw person
+was all very good.
+
+I was a bit nervous about doing i2s by hand, but it was all trivial and
+worked surprisingly pretty much on the first try even though I had never
+done i2s before and was just doing it by reading the TI datasheets for
+the codec.  Which brings me to ...
+
+### TAC5112
+
+The whole TC5xxx range from TI seems to be a very nice collection.  I
+had picked the TAC5112 not because it was the most sensible choice, but
+because it was in stock at JLCPCB.  I didn't even connect the stereo
+inputs and outputs, so the TAC5111 would have been the better match for
+this project, but it didn't really matter.
+
+I hardly scratched what the TAC5112 can do, but the setup is easy, the
+hw biquad filters were pretty straightforward, and I have no complaints.
+
+Yeah, I had thought I wanted to do the analog loopback, but even without
+messing with the low-latency settings, just feeding the ADC input back
+to the DAC with the 52kHz i2s setup I did had latencies in the 700uS
+range.
+
+In fact, the way I did all the example effects, they all had that same
+very low latency, but that was because I never went past the "one audio
+sample at a time, with a delay line" model.
+
+## The bad:
+
+Analog audio is just overrated.  Except as a way to learn about the
+components, there's no reason to.  Including linear power supplies.
+
+And the reason I put this under "bad" is that I ended up being very
+annoyed with the analog pots and the stomp switch on the final board.
+They came from that analog background, and made sense at the time as a
+transition, but they are bad too.  Four potentiometers take a lot of
+space, and were still too limiting.
+
+So if I ever get back to this, I will not have potentiometers and use
+the ADC pins on the microcontroller for them.  There's a reason modern
+guitar pedals use a rotary encoder and a display.
+
+In fact, the only reason I might resurrect this project is to just
+replace the four pots with one or two rotary encoders, and a couple of
+switches.  And _all_ of that would be based on hall effect sensors or
+the like.  No m ore analog stuff, except for the actual analog audio
+input and output.
+
+I didn't realize just how annoying those things would be once you had a
+microcontroller.  I'll know better next time.
+
+## The ugly
+
+That six-layer board was just stupid.  The only reason I did it was
+because there was a JLCPCB coupon for 6-layer boards, so because I
+wanted via-in-pad and ENIG, I think it ended up being a couple of bucks
+cheaper to do it all with six layers.  One of the layers in my design
+was literally empty - I didn't even do a ground plane in it, because I
+already had two ground planes.
+
+So that PCB design is silly.  I'd never do a two-layer board like the
+minimal RPI example board is, because it's just not worth the effort,
+but that six layer board was just stupid.  It all worked - on the first
+try - but still... Just don't look at it.
+
 ### Background
 
 This is a personal toy project that has gone through several phases, but
