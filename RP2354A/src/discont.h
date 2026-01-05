@@ -7,43 +7,54 @@
 // afraid.
 //
 struct {
-	unsigned int i;
-	float diff;
-	float delay;
+	struct lfo_state lfo;
+	float step;
 } disco;
 
-#define DISCONT_STEPS 4096
+#define DISCONT_SHIFT 12
+#define DISCONT_STEPS (1 << DISCONT_SHIFT)
+
+#define SEMITONE_MULT (1.0594630943592953f)
+
+#define FIFTH ((float)3/2)
+#define FOURTH ((float)4/3)
 
 void discont_init(float pot1, float pot2, float pot3, float pot4)
 {
-	float semitone = rintf(pot1 * 24 - 12) / 12;
-
 	// Which direction do we walk the samples?
 	// Walking backwards lowers the pitch
 	// Walking forwards raises the pitch
 	// Staying at the same delay keeps the pitch the same
-	disco.diff = fastpow2(semitone) - 1;
-	if (disco.diff <= 0)
-		disco.delay = 0;
-	else
-		disco.delay = disco.diff * DISCONT_STEPS;
+	int i = (int)(pot1 * 7);
+	static const float tonesteps[7] = {
+		0.5, 1/FIFTH, 1/FOURTH, 1, FOURTH, FIFTH, 2
+	};
+	float step = tonesteps[i]-1;
+	disco.step = step;
+
+	// We set the LFO to be 2*DISCONT_STEPS
+	// but then we basically just use half
+	// of it twice
+	disco.lfo.step = 1 << (31-DISCONT_SHIFT);
 }
 
-// sin_i is discontinuous when sin is 0
-// cos_i is discontinuous when cos is 0
+// i is discontinuous when sin**2 is 0
+// ni is discontinuous when cos**2 (aka 1-sin**2) is 0
 float discont_step(float in)
 {
-	int i = disco.i, cos_i;
-	disco.i = (i+1)&(DISCONT_STEPS-1);
-	cos_i = (i + DISCONT_STEPS/2)&(DISCONT_STEPS-1);
+	// The 'idx << 1' is because we only use half the wave,
+	// we'll use 'sin**2' that is the same in both halves
+	uint i = (disco.lfo.idx << 1) >> (32 - DISCONT_SHIFT);
+	int ni = (i + DISCONT_STEPS/2) & (DISCONT_STEPS-1);
+	float sin = lfo_step(&disco.lfo, lfo_sinewave);
 
-	struct sincos sincos = fastsincos(i / ((float)2*DISCONT_STEPS));
-	sincos.sin = sincos.sin * sincos.sin;
-	sincos.cos = sincos.cos * sincos.cos;
+	float step = disco.step;
+	float delay = step < 0 ? 0 : 2*DISCONT_STEPS*step;
 
 	sample_array_write(in);
-	float d1 = sample_array_read(disco.delay - i*disco.diff) * sincos.sin;
-	float d2 = sample_array_read(disco.delay - cos_i*disco.diff) * sincos.cos;
+	sin *= sin;
+	float d1 = sample_array_read(delay - i*step) * sin;
+	float d2 = sample_array_read(delay - ni*step) * (1-sin);
 
 	return d1+d2;
 }

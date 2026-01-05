@@ -17,9 +17,11 @@ static struct lfo_state effect_lfo;
 #define effect_set_depth(d)	effect_depth = (d)
 #define effect_set_feedback(fb)	effect_feedback = (fb)
 
+#define SAMPLES_PER_MSEC (SAMPLES_PER_SEC * 0.001)
+
 static inline void effect_set_delay(float ms)
 {
-	float samples = ms * (SAMPLES_PER_SEC * 0.001);
+	float samples = ms * SAMPLES_PER_MSEC;
 
 	if (samples > 0 && samples < SAMPLE_ARRAY_SIZE)
 		target_effect_delay = samples;

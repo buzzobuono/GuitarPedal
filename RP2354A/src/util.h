@@ -20,21 +20,6 @@ static inline float fastpow2_m1(float x)
 	return c1*x + c2*x2 + c3*x3 + c4*x2*x2;
 }
 
-static inline float fastpow2(float x)
-{
-	int i = floor(x); x -= i;
-	x = fastpow2_m1(x) + 1.0;
-	while (i > 0) {
-		x*=2;
-		i--;
-	}
-	while (i < 0) {
-		x/=2;
-		i++;
-	}
-	return x;
-}
-
 static inline float fastpow(float a, float b)
 {
 	union { float f; int i; } u = { a };
